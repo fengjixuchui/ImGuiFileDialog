@@ -758,6 +758,12 @@ namespace igfd
 	{
 		if (m_ShowDialog && dlg_key == vKey)
 		{
+			// to be sure than only one dialog displayed per frame
+			ImGuiContext& g = *GImGui;
+			if (g.FrameCount == m_LastImGuiFrameCount) // one instance was dipslayed this frame for this key +> quit
+				return false;
+			m_LastImGuiFrameCount = g.FrameCount; // mark this instance as sued this frame
+
 			bool res = false;
 
 			std::string name = dlg_name + "##" + dlg_key;
@@ -967,7 +973,7 @@ namespace igfd
 				ImGui::BeginChild("##FileDialog_FileList", size);
 #else
 				static ImGuiTableFlags flags = ImGuiTableFlags_ColumnsWidthFixed | ImGuiTableFlags_RowBg |
-					ImGuiTableFlags_Hideable | ImGuiTableFlags_ScrollY | 
+					ImGuiTableFlags_Hideable | ImGuiTableFlags_ScrollY |
 					ImGuiTableFlags_NoHostExtendY 
 	#ifndef USE_CUSTOM_SORTING_ICON
 					| ImGuiTableFlags_Sortable
@@ -975,6 +981,7 @@ namespace igfd
 					;
 				if (ImGui::BeginTable("##fileTable", 3, flags, size))
 				{
+					ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
 					ImGui::TableSetupColumn(m_HeaderFileName.c_str(), ImGuiTableColumnFlags_WidthStretch, -1, 0);
 					ImGui::TableSetupColumn(m_HeaderFileSize.c_str(), ImGuiTableColumnFlags_WidthAutoResize, -1, 1);
 					ImGui::TableSetupColumn(m_HeaderFileDate.c_str(), ImGuiTableColumnFlags_WidthAutoResize, -1, 2);
@@ -1255,6 +1262,17 @@ namespace igfd
 			dlg_key.clear();
 			m_ShowDialog = false;
 		}
+	}
+
+	bool ImGuiFileDialog::WasOpenedThisFrame(const std::string& vKey)
+	{
+		bool res = m_ShowDialog && dlg_key == vKey;
+		if (res)
+		{
+			ImGuiContext& g = *GImGui;
+			res &= m_LastImGuiFrameCount == g.FrameCount; // return true if a dialog was displayed in this frame
+		}
+		return res;
 	}
 
 	std::string ImGuiFileDialog::GetFilePathName()

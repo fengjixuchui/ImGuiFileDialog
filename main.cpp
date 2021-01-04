@@ -348,7 +348,19 @@ int main(int, char**)
 							".", "", std::bind(&InfosPane, std::placeholders::_1, std::placeholders::_2,
 								std::placeholders::_3), 350, 1, igfd::UserDatas("SaveFile"));
 				}
-                if (ImGui::Button(ICON_IGFD_FOLDER_OPEN " Open Directory Dialog"))
+				if (ImGui::Button(ICON_IGFD_SAVE " Save File Dialog with Confirm Dialog For Overwrite File if exist"))
+				{
+					const char* filters = "C++ File (*.cpp){.cpp}";
+					if (standardDialogMode)
+						igfd::ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey",
+							ICON_IGFD_SAVE " Choose a File", filters,
+							".", "", 1, igfd::UserDatas("SaveFile"), ImGuiFileDialogFlags_ConfirmOverwrite);
+					else
+						igfd::ImGuiFileDialog::Instance()->OpenModal("ChooseFileDlgKey",
+							ICON_IGFD_SAVE " Choose a File", filters,
+							".", 1, igfd::UserDatas("SaveFile"), ImGuiFileDialogFlags_ConfirmOverwrite);
+				}
+				if (ImGui::Button(ICON_IGFD_FOLDER_OPEN " Open Directory Dialog"))
                 {
 					// set filters to 0 for open directory chooser
 					if (standardDialogMode)
@@ -397,10 +409,10 @@ int main(int, char**)
 						filePath = igfd::ImGuiFileDialog::Instance()->GetCurrentPath();
 						filter = igfd::ImGuiFileDialog::Instance()->GetCurrentFilter();
 						// here convert from string because a string was passed as a userDatas, but it can be what you want
-                        userDatas;
-						if (igfd::ImGuiFileDialog::Instance()->GetUserDatas())
+                        if (igfd::ImGuiFileDialog::Instance()->GetUserDatas())
                             userDatas = std::string((const char*)igfd::ImGuiFileDialog::Instance()->GetUserDatas());
 						auto sel = igfd::ImGuiFileDialog::Instance()->GetSelection(); // multiselection
+						selection.clear();
 						for (auto s : sel)
 						{
 							selection.emplace_back(s.first, s.second);
@@ -419,10 +431,10 @@ int main(int, char**)
                         filePath = igfd::ImGuiFileDialog::Instance()->GetCurrentPath();
                         filter = igfd::ImGuiFileDialog::Instance()->GetCurrentFilter();
                         // here convert from string because a string was passed as a userDatas, but it can be what you want
-                        userDatas;
                         if (igfd::ImGuiFileDialog::Instance()->GetUserDatas())
                             userDatas = std::string((const char*)igfd::ImGuiFileDialog::Instance()->GetUserDatas());
 						auto sel = igfd::ImGuiFileDialog::Instance()->GetSelection(); // multiselection
+						selection.clear();
 						for (auto s : sel)
 						{
 							selection.emplace_back(s.first, s.second);
